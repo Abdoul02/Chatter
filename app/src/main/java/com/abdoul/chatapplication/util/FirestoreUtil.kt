@@ -3,6 +3,7 @@ package com.abdoul.chatapplication.util
 import android.content.Context
 import android.util.Log
 import com.abdoul.chatapplication.model.*
+import com.abdoul.chatapplication.model.item.ImageMessageItem
 import com.abdoul.chatapplication.model.item.PersonItem
 import com.abdoul.chatapplication.model.item.TextMessageItem
 import com.google.firebase.auth.FirebaseAuth
@@ -127,7 +128,12 @@ object FireStoreUtil {
                     if (it["type"] == MessageType.TEXT)
                         items.add(TextMessageItem(it.toObject(TextMessage::class.java)!!, context))
                     else
-                        TODO("Add Image message")
+                        items.add(
+                            ImageMessageItem(
+                                it.toObject(ImageMessage::class.java)!!,
+                                context
+                            )
+                        )
                 }
                 onListen(items)
             }
