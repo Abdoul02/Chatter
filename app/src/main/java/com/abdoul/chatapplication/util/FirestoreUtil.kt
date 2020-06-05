@@ -2,11 +2,8 @@ package com.abdoul.chatapplication.util
 
 import android.content.Context
 import android.util.Log
-import com.abdoul.chatapplication.model.ChatChannel
-import com.abdoul.chatapplication.model.MessageType
-import com.abdoul.chatapplication.model.TextMessage
+import com.abdoul.chatapplication.model.*
 import com.abdoul.chatapplication.model.item.PersonItem
-import com.abdoul.chatapplication.model.User
 import com.abdoul.chatapplication.model.item.TextMessageItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -134,5 +131,11 @@ object FireStoreUtil {
                 }
                 onListen(items)
             }
+    }
+
+    fun sendMessage(message: Message, channelId: String) {
+        chatChannelsCollectionRef.document(channelId)
+            .collection("messages")
+            .add(message)
     }
 }
