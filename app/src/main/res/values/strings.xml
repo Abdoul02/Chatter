@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Chatter</string>
+    <string name="title_chat">Chat</string>
+    <string name="title_account">My Account</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="login_logo">login logo</string>
+    <string name="sign_in">Continue &amp; Sign In</string>
+    <string name="account_set_up">Setting up your account</string>
+    <string name="name">My Name</string>
+    <string name="bio">My Bio</string>
+    <string name="sign_out">Sign out</string>
+    <string name="save">Save</string>
+</resources>
