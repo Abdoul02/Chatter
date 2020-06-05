@@ -10,4 +10,6 @@
     <string name="bio">My Bio</string>
     <string name="sign_out">Sign out</string>
     <string name="save">Save</string>
+    <string name="send_your_message">Send your message</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</string>
 </resources>
