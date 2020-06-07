@@ -5,14 +5,14 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.abdoul.chatapplication.model.ImageMessage
 import com.abdoul.chatapplication.model.MessageType
 import com.abdoul.chatapplication.model.TextMessage
-import com.abdoul.chatapplication.ui.account.AccountFragment
+import com.abdoul.chatapplication.model.User
 import com.abdoul.chatapplication.util.AppConstants
 import com.abdoul.chatapplication.util.FireStoreUtil
 import com.abdoul.chatapplication.util.StorageUtil
@@ -34,6 +34,8 @@ class ChatActivity : AppCompatActivity() {
     private var shouldInitRecyclerView = true
     private lateinit var messageSection: Section
     private lateinit var currentChannelId: String
+    private lateinit var currentUser: User
+    private lateinit var otherUserId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +43,10 @@ class ChatActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = intent.getStringExtra(AppConstants.USER_NAME)
-
-        val otherUserId = intent.getStringExtra(AppConstants.USER_ID)
+        FireStoreUtil.getCurrentUser {
+            currentUser = it
+        }
+        otherUserId = intent.getStringExtra(AppConstants.USER_ID)
 
         FireStoreUtil.getOrCreateChatChannel(otherUserId) { channelId ->
             currentChannelId = channelId
@@ -59,7 +63,7 @@ class ChatActivity : AppCompatActivity() {
             if (editText_message.length() > 0) {
                 val messageToSend = TextMessage(
                     editText_message.text.toString(), Calendar.getInstance().time,
-                    FirebaseAuth.getInstance().currentUser!!.uid, MessageType.TEXT
+                    FirebaseAuth.getInstance().currentUser!!.uid, otherUserId, currentUser.name
                 )
                 editText_message.setText("")
                 FireStoreUtil.sendMessage(messageToSend, channelId)
@@ -112,7 +116,7 @@ class ChatActivity : AppCompatActivity() {
                 val messageToSend = ImageMessage(
                     imagePath,
                     Calendar.getInstance().time,
-                    FirebaseAuth.getInstance().currentUser!!.uid
+                    FirebaseAuth.getInstance().currentUser!!.uid,otherUserId, currentUser.name
                 )
 
                 FireStoreUtil.sendMessage(messageToSend, currentChannelId)
