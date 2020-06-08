@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.abdoul.customsnackbar.CustomSnackBar
@@ -54,5 +55,9 @@ object CommonUtils {
             }
             source?.let { ImageDecoder.decodeBitmap(it) }
         }
+    }
+
+    fun validateInput(editText: EditText): Boolean {
+        return editText.text.trim().isNotEmpty()
     }
 }

@@ -49,22 +49,28 @@ class AccountFragment : Fragment() {
             }
 
             btnSave.setOnClickListener {
-                if (::selectedImageBytes.isInitialized) {
-                    StorageUtil.uploadProfilePicture(selectedImageBytes) { imagePath ->
+
+                if (CommonUtils.validateInput(edtName)) {
+                    if (::selectedImageBytes.isInitialized) {
+                        StorageUtil.uploadProfilePicture(selectedImageBytes) { imagePath ->
+                            FireStoreUtil.updateCurrentUser(
+                                edtName.text.toString(),
+                                edtBio.text.toString(),
+                                imagePath
+                            )
+                        }
+
+                    } else {
                         FireStoreUtil.updateCurrentUser(
                             edtName.text.toString(),
                             edtBio.text.toString(),
-                            imagePath
+                            null
                         )
                     }
+                    CommonUtils.showToast(requireContext(), "Saving")
                 } else {
-                    FireStoreUtil.updateCurrentUser(
-                        edtName.text.toString(),
-                        edtBio.text.toString(),
-                        null
-                    )
+                    CommonUtils.showToast(requireContext(), "Please provide name")
                 }
-                CommonUtils.showToast(requireContext(), "Saving")
             }
 
             btnSignOut.setOnClickListener {
