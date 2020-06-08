@@ -17,6 +17,7 @@ class PersonItem(val person: User, val userId: String, private val context: Cont
         if (person.profilePicture != null) {
             GlideApp.with(context)
                 .load(StorageUtil.pathToReference(person.profilePicture))
+                .circleCrop()
                 .placeholder(R.drawable.ic_account)
                 .into(viewHolder.imgPersonProfilePict)
         }

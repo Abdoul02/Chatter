@@ -19,7 +19,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         if (remoteMessage.notification != null) {
-            //TODO show Notification
             Log.d(TAG, "Remote: ${remoteMessage.data}")
         }
     }

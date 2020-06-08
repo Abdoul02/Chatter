@@ -23,7 +23,6 @@ import kotlinx.android.synthetic.main.fragment_chat.*
 
 class ChatFragment : Fragment() {
 
-    private lateinit var chatViewModel: ChatViewModel
     private lateinit var userListenerRegistration: ListenerRegistration
     private var shouldInitRecyclerView = true
     private lateinit var peopleSection: Section
@@ -33,8 +32,6 @@ class ChatFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        chatViewModel =
-            ViewModelProvider(this).get(ChatViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_chat, container, false)
         activity?.let {
             userListenerRegistration = FireStoreUtil.addUsersListener(it, this::updateRecyclerView)

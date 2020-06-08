@@ -11,13 +11,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.abdoul.chatapplication.R
 import com.abdoul.chatapplication.SignInActivity
 import com.abdoul.chatapplication.glide.GlideApp
 import com.abdoul.chatapplication.util.FireStoreUtil
 import com.abdoul.chatapplication.util.StorageUtil
-import com.abdoul.chatapplication.util.ViewUtils
+import com.abdoul.chatapplication.util.CommonUtils
+import com.bumptech.glide.request.RequestOptions
 import com.firebase.ui.auth.AuthUI
 import kotlinx.android.synthetic.main.fragment_account.*
 import kotlinx.android.synthetic.main.fragment_account.view.*
@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream
 
 class AccountFragment : Fragment() {
 
-    private lateinit var accountViewModel: AccountViewModel
     private lateinit var selectedImageBytes: ByteArray
     private var pictureChanged = false
 
@@ -34,8 +33,6 @@ class AccountFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        accountViewModel =
-            ViewModelProvider(this).get(AccountViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_account, container, false)
 
         root.apply {
@@ -67,7 +64,7 @@ class AccountFragment : Fragment() {
                         null
                     )
                 }
-                ViewUtils.showToast(requireContext(), "Saving")
+                CommonUtils.showToast(requireContext(), "Saving")
             }
 
             btnSignOut.setOnClickListener {
@@ -112,6 +109,7 @@ class AccountFragment : Fragment() {
             selectedImageBytes = outputStream.toByteArray()
             GlideApp.with(this)
                 .load(selectedImageBytes)
+                .circleCrop()
                 .into(imgProfilePicture)
 
             pictureChanged = true
@@ -127,6 +125,7 @@ class AccountFragment : Fragment() {
                 if (!pictureChanged && user.profilePicture != null) {
                     GlideApp.with(this)
                         .load(StorageUtil.pathToReference(user.profilePicture))
+                        .circleCrop()
                         .placeholder(R.drawable.ic_account)
                         .into(imgProfilePicture)
                 }

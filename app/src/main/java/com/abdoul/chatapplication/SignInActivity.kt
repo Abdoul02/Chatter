@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.abdoul.chatapplication.service.MyFirebaseMessagingService
 import com.abdoul.chatapplication.util.FireStoreUtil
+import com.abdoul.chatapplication.util.CommonUtils
 import com.abdoul.customsnackbar.CustomSnackBar
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.ErrorCodes
@@ -32,11 +33,19 @@ class SignInActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sign_in)
 
         btnSignIn.setOnClickListener {
-            val intent = AuthUI.getInstance().createSignInIntentBuilder()
-                .setAvailableProviders(signInProviders)
-                .setLogo(R.drawable.ic_logo)
-                .build()
-            startActivityForResult(intent, SIGN_IN_REQUEST)
+            if(CommonUtils.isOnline(this)){
+                val intent = AuthUI.getInstance().createSignInIntentBuilder()
+                    .setAvailableProviders(signInProviders)
+                    .setLogo(R.drawable.ic_logo)
+                    .build()
+                startActivityForResult(intent, SIGN_IN_REQUEST)
+            }else{
+                CommonUtils.showSnackBar(
+                    clParentView, "You have no internet connection",
+                    R.color.grey,
+                    R.drawable.ic_no_network, this
+                )
+            }
         }
     }
 
@@ -59,16 +68,20 @@ class SignInActivity : AppCompatActivity() {
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 if (response == null) return
                 when (response.error?.errorCode) {
-                    ErrorCodes.NO_NETWORK -> showSnackBar(
-                        "No netWork",
-                        R.color.colorPrimary,
-                        R.drawable.ic_no_network
-                    )
-                    ErrorCodes.UNKNOWN_ERROR -> showSnackBar(
-                        "Unknown Error",
-                        R.color.red,
-                        R.drawable.ic_error
-                    )
+                    ErrorCodes.NO_NETWORK -> {
+                        CommonUtils.showSnackBar(
+                            clParentView, "No netWork",
+                            R.color.red,
+                            R.drawable.ic_no_network, this
+                        )
+                    }
+                    ErrorCodes.UNKNOWN_ERROR -> {
+                        CommonUtils.showSnackBar(
+                            clParentView, "Unknown Error",
+                            R.color.red,
+                            R.drawable.ic_error, this
+                        )
+                    }
                 }
             }
         }
@@ -81,6 +94,13 @@ class SignInActivity : AppCompatActivity() {
         if (show) {
             dialog.show()
         } else {
+            dialog.dismiss()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (::dialog.isInitialized && dialog.isShowing) {
             dialog.dismiss()
         }
     }
