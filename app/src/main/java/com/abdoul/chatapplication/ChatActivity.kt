@@ -7,9 +7,7 @@ import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
@@ -28,12 +26,7 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Section
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
-import kotlinx.android.synthetic.main.activity_chat.editText_message
-import kotlinx.android.synthetic.main.activity_chat.fab_send_image
-import kotlinx.android.synthetic.main.activity_chat.fab_take_photo
-import kotlinx.android.synthetic.main.activity_chat.imageView_send
-import kotlinx.android.synthetic.main.activity_chat.recycler_view_messages
-import kotlinx.android.synthetic.main.test.*
+import kotlinx.android.synthetic.main.activity_chat.*
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -51,7 +44,7 @@ class ChatActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.test)
+        setContentView(R.layout.activity_chat)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = intent.getStringExtra(AppConstants.USER_NAME)
@@ -87,7 +80,6 @@ class ChatActivity : AppCompatActivity() {
 
     private fun sendImageMessageListener() {
         fab_send_image.setOnClickListener {
-
             if (isFABOpen) {
                 hideMenu()
             } else {
@@ -261,7 +253,7 @@ class ChatActivity : AppCompatActivity() {
 
     companion object {
         private const val SELECT_IMAGE_MSG_REQUEST = 3
-        private val PERMISSION_CODE = 4
-        private val IMAGE_CAPTURE_CODE = 5
+        private const val PERMISSION_CODE = 4
+        private const val IMAGE_CAPTURE_CODE = 5
     }
 }

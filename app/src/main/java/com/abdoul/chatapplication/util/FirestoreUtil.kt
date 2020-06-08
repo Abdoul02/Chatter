@@ -15,8 +15,8 @@ import java.lang.NullPointerException
 
 object FireStoreUtil {
 
-    const val FIRESTORE_TAG = "FIRESTORE"
-    const val ENGAGED_CHAT_CHANNEL = "engagedChatChannels"
+    private const val FIRESTORE_TAG = "FIRESTORE"
+    private const val ENGAGED_CHAT_CHANNEL = "engagedChatChannels"
     private val fireStoreInstance: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
     private val currentUserDocRef: DocumentReference
