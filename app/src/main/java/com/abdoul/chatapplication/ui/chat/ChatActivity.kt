@@ -10,13 +10,16 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.RemoteInput
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.abdoul.chatapplication.R
 import com.abdoul.chatapplication.util.AppConstants
 import com.abdoul.chatapplication.util.CommonUtils
+import com.abdoul.chatapplication.util.NotificationUtil.showRepliedNotification
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Section
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
@@ -53,11 +56,34 @@ class ChatActivity : AppCompatActivity() {
         })
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d("DirectReply", "Called")
+        if (intent != null) {
+            handleDirectReply(intent)
+        }
+    }
+
+    private fun handleDirectReply(myIntent: Intent) {
+        otherUserId = myIntent.getStringExtra(AppConstants.USER_ID)
+        val notificationId = myIntent.getIntExtra(AppConstants.NOTIFICATION_ID, 0)
+        val remoteInput = RemoteInput.getResultsFromIntent(intent)
+        if (remoteInput != null && otherUserId.isNotEmpty()) {
+            val inputString = remoteInput.getCharSequence(
+                AppConstants.KEY_REPLY
+            ).toString()
+
+            chatViewModel.sendMessage(inputString, otherUserId)
+            showRepliedNotification(this, notificationId)
+        }
+        Log.d("DirectReply", "message: $remoteInput id: $otherUserId")
+    }
+
     private fun setUpListeners() {
 
         imageView_send.setOnClickListener {
             if (editText_message.length() > 0) {
-                chatViewModel.sendMessage(editText_message.text.toString(),otherUserId)
+                chatViewModel.sendMessage(editText_message.text.toString(), otherUserId)
                 editText_message.setText("")
             } else {
                 CommonUtils.showToast(this, "Please enter a message")
@@ -101,7 +127,7 @@ class ChatActivity : AppCompatActivity() {
 
                     selectedImageBmp?.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     val selectedImageBytes = outputStream.toByteArray()
-                    chatViewModel.sendImageMessage(otherUserId,selectedImageBytes)
+                    chatViewModel.sendImageMessage(otherUserId, selectedImageBytes)
                 }
             }
 
@@ -110,7 +136,7 @@ class ChatActivity : AppCompatActivity() {
                     val photoBitmap = CommonUtils.getBitmap(this, imageUri)
                     photoBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     val capturedPictureByte = outputStream.toByteArray()
-                    chatViewModel.sendImageMessage(otherUserId,capturedPictureByte)
+                    chatViewModel.sendImageMessage(otherUserId, capturedPictureByte)
                 }
             }
         }
