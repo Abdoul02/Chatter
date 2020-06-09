@@ -11,9 +11,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.abdoul.chatapplication.R
 import com.abdoul.chatapplication.SignInActivity
 import com.abdoul.chatapplication.glide.GlideApp
+import com.abdoul.chatapplication.model.User
 import com.abdoul.chatapplication.util.FireStoreUtil
 import com.abdoul.chatapplication.util.StorageUtil
 import com.abdoul.chatapplication.util.CommonUtils
@@ -27,6 +30,7 @@ class AccountFragment : Fragment() {
 
     private lateinit var selectedImageBytes: ByteArray
     private var pictureChanged = false
+    lateinit var accountViewModel: AccountViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,6 +38,7 @@ class AccountFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_account, container, false)
+        accountViewModel = ViewModelProvider(this).get(AccountViewModel::class.java)
 
         root.apply {
             imgProfilePicture.setOnClickListener {
@@ -52,19 +57,15 @@ class AccountFragment : Fragment() {
 
                 if (CommonUtils.validateInput(edtName)) {
                     if (::selectedImageBytes.isInitialized) {
-                        StorageUtil.uploadProfilePicture(selectedImageBytes) { imagePath ->
-                            FireStoreUtil.updateCurrentUser(
-                                edtName.text.toString(),
-                                edtBio.text.toString(),
-                                imagePath
-                            )
-                        }
+                        accountViewModel.updateUserInfo(
+                            selectedImageBytes, edtName.text.toString(),
+                            edtBio.text.toString()
+                        )
 
                     } else {
-                        FireStoreUtil.updateCurrentUser(
-                            edtName.text.toString(),
-                            edtBio.text.toString(),
-                            null
+                        accountViewModel.updateUserInfo(
+                            null, edtName.text.toString(),
+                            edtBio.text.toString()
                         )
                     }
                     CommonUtils.showToast(requireContext(), "Saving")
@@ -124,17 +125,23 @@ class AccountFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        FireStoreUtil.getCurrentUser { user ->
-            if (this@AccountFragment.isVisible) {
-                edtName.setText(user.name)
-                edtBio.setText(user.bio)
-                if (!pictureChanged && user.profilePicture != null) {
-                    GlideApp.with(this)
-                        .load(StorageUtil.pathToReference(user.profilePicture))
-                        .circleCrop()
-                        .placeholder(R.drawable.ic_account)
-                        .into(imgProfilePicture)
-                }
+        accountViewModel.userLiveData.observe(viewLifecycleOwner, Observer {
+            it?.let { user ->
+                updateUserProfile(user)
+            }
+        })
+    }
+
+    private fun updateUserProfile(user: User) {
+        if (this@AccountFragment.isVisible) {
+            edtName.setText(user.name)
+            edtBio.setText(user.bio)
+            if (!pictureChanged && user.profilePicture != null) {
+                GlideApp.with(this)
+                    .load(StorageUtil.pathToReference(user.profilePicture))
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_account)
+                    .into(imgProfilePicture)
             }
         }
     }

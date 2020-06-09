@@ -104,14 +104,4 @@ class SignInActivity : AppCompatActivity() {
             dialog.dismiss()
         }
     }
-
-    private fun showSnackBar(message: String, color: Int, icon: Int) {
-        val customSnackBar = CustomSnackBar.make(
-            clParentView,
-            message,
-            icon,
-            ContextCompat.getColor(this, color)
-        )
-        customSnackBar?.show()
-    }
 }
