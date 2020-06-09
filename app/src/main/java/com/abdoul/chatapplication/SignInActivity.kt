@@ -41,7 +41,7 @@ class SignInActivity : AppCompatActivity() {
                 startActivityForResult(intent, SIGN_IN_REQUEST)
             }else{
                 CommonUtils.showSnackBar(
-                    clParentView, "You have no internet connection",
+                    clParentView, getString(R.string.no_internet),
                     R.color.grey,
                     R.drawable.ic_no_network, this
                 )
@@ -70,14 +70,14 @@ class SignInActivity : AppCompatActivity() {
                 when (response.error?.errorCode) {
                     ErrorCodes.NO_NETWORK -> {
                         CommonUtils.showSnackBar(
-                            clParentView, "No netWork",
+                            clParentView, getString(R.string.no_internet),
                             R.color.red,
                             R.drawable.ic_no_network, this
                         )
                     }
                     ErrorCodes.UNKNOWN_ERROR -> {
                         CommonUtils.showSnackBar(
-                            clParentView, "Unknown Error",
+                            clParentView, getString(R.string.unknown_error),
                             R.color.red,
                             R.drawable.ic_error, this
                         )
@@ -103,15 +103,5 @@ class SignInActivity : AppCompatActivity() {
         if (::dialog.isInitialized && dialog.isShowing) {
             dialog.dismiss()
         }
-    }
-
-    private fun showSnackBar(message: String, color: Int, icon: Int) {
-        val customSnackBar = CustomSnackBar.make(
-            clParentView,
-            message,
-            icon,
-            ContextCompat.getColor(this, color)
-        )
-        customSnackBar?.show()
     }
 }

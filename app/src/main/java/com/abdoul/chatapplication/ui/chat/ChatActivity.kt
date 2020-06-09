@@ -1,4 +1,4 @@
-package com.abdoul.chatapplication
+package com.abdoul.chatapplication.ui.chat
 
 import android.Manifest
 import android.animation.Animator
@@ -8,36 +8,29 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.abdoul.chatapplication.model.ImageMessage
-import com.abdoul.chatapplication.model.TextMessage
-import com.abdoul.chatapplication.model.User
+import com.abdoul.chatapplication.R
 import com.abdoul.chatapplication.util.AppConstants
 import com.abdoul.chatapplication.util.CommonUtils
-import com.abdoul.chatapplication.util.FireStoreUtil
-import com.abdoul.chatapplication.util.StorageUtil
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ListenerRegistration
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Section
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.activity_chat.*
 import java.io.ByteArrayOutputStream
-import java.util.*
 
 
 class ChatActivity : AppCompatActivity() {
 
-    private lateinit var messagesListenerRegistration: ListenerRegistration
+    private lateinit var chatViewModel: ChatViewModel
     private var shouldInitRecyclerView = true
     private lateinit var messageSection: Section
-    private lateinit var currentChannelId: String
-    private lateinit var currentUser: User
     private lateinit var otherUserId: String
     private var imageUri: Uri? = null
     var isFABOpen = false
@@ -45,40 +38,33 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+        chatViewModel = ViewModelProvider(this).get(ChatViewModel::class.java)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = intent.getStringExtra(AppConstants.USER_NAME)
-        FireStoreUtil.getCurrentUser {
-            currentUser = it
-        }
         otherUserId = intent.getStringExtra(AppConstants.USER_ID)
 
-        FireStoreUtil.getOrCreateChatChannel(otherUserId) { channelId ->
-            currentChannelId = channelId
-            messagesListenerRegistration =
-                FireStoreUtil.addChatMessagesListener(channelId, this, this::updateRecyclerView)
-            sendMessageListener(channelId)
-            sendImageMessageListener()
-        }
+        chatViewModel.getOrCreateChatChannel(otherUserId)
+
+        chatViewModel.messagesLiveData.observe(this, androidx.lifecycle.Observer {
+            it?.let { messages ->
+                updateRecyclerView(messages)
+                setUpListeners()
+            }
+        })
     }
 
-    private fun sendMessageListener(channelId: String) {
+    private fun setUpListeners() {
 
         imageView_send.setOnClickListener {
             if (editText_message.length() > 0) {
-                val messageToSend = TextMessage(
-                    editText_message.text.toString(), Calendar.getInstance().time,
-                    FirebaseAuth.getInstance().currentUser!!.uid, otherUserId, currentUser.name
-                )
+                chatViewModel.sendMessage(editText_message.text.toString(), otherUserId)
                 editText_message.setText("")
-                FireStoreUtil.sendMessage(messageToSend, channelId)
             } else {
-                CommonUtils.showToast(this, "Please enter a message")
+                CommonUtils.showToast(this, getString(R.string.enter_name))
             }
         }
-    }
 
-    private fun sendImageMessageListener() {
         fab_send_image.setOnClickListener {
             if (isFABOpen) {
                 hideMenu()
@@ -94,7 +80,7 @@ class ChatActivity : AppCompatActivity() {
                 putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png"))
             }
             startActivityForResult(
-                Intent.createChooser(intent, "Select Image"),
+                Intent.createChooser(intent, getString(R.string.select_image)),
                 SELECT_IMAGE_MSG_REQUEST
             )
         }
@@ -116,17 +102,7 @@ class ChatActivity : AppCompatActivity() {
 
                     selectedImageBmp?.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     val selectedImageBytes = outputStream.toByteArray()
-                    StorageUtil.uploadMessageImage(selectedImageBytes) { imagePath ->
-                        val messageToSend = ImageMessage(
-                            imagePath,
-                            Calendar.getInstance().time,
-                            FirebaseAuth.getInstance().currentUser!!.uid,
-                            otherUserId,
-                            currentUser.name
-                        )
-
-                        FireStoreUtil.sendMessage(messageToSend, currentChannelId)
-                    }
+                    chatViewModel.sendImageMessage(otherUserId, selectedImageBytes)
                 }
             }
 
@@ -135,17 +111,7 @@ class ChatActivity : AppCompatActivity() {
                     val photoBitmap = CommonUtils.getBitmap(this, imageUri)
                     photoBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     val capturedPictureByte = outputStream.toByteArray()
-                    StorageUtil.uploadMessageImage(capturedPictureByte) { imagePath ->
-                        val messageToSend = ImageMessage(
-                            imagePath,
-                            Calendar.getInstance().time,
-                            FirebaseAuth.getInstance().currentUser!!.uid,
-                            otherUserId,
-                            currentUser.name
-                        )
-
-                        FireStoreUtil.sendMessage(messageToSend, currentChannelId)
-                    }
+                    chatViewModel.sendImageMessage(otherUserId, capturedPictureByte)
                 }
             }
         }
@@ -205,12 +171,19 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun takePicture() {
-        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
-            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
-        ) {
-            val permission =
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            requestPermissions(permission, PERMISSION_CODE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
+            ) {
+                val permission =
+                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                requestPermissions(
+                    permission,
+                    PERMISSION_CODE
+                )
+            } else {
+                openCamera()
+            }
         } else {
             openCamera()
         }
@@ -218,12 +191,15 @@ class ChatActivity : AppCompatActivity() {
 
     private fun openCamera() {
         val values = ContentValues()
-        values.put(MediaStore.Images.Media.TITLE, "New Picture")
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
+        values.put(MediaStore.Images.Media.TITLE, getString(R.string.new_picture))
+        values.put(MediaStore.Images.Media.DESCRIPTION, getString(R.string.from_camera))
         imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
-        startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
+        startActivityForResult(
+            cameraIntent,
+            IMAGE_CAPTURE_CODE
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -237,7 +213,7 @@ class ChatActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera()
                 } else {
-                    CommonUtils.showToast(this, "Please grant permission in settings")
+                    CommonUtils.showToast(this, getString(R.string.grant_permission))
                 }
             }
         }
