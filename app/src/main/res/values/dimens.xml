@@ -10,4 +10,7 @@
     <dimen name="card_corner_radius">5dp</dimen>
     <dimen name="card_cl_padding">10dp</dimen>
     <dimen name="card_margin_top">5dp</dimen>
+
+    <dimen name="standard_55">55dp</dimen>
+    <dimen name="standard_100">100dp</dimen>
 </resources>

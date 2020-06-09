@@ -17,10 +17,29 @@ class PersonItem(val person: User, val userId: String, private val context: Cont
         if (person.profilePicture != null) {
             GlideApp.with(context)
                 .load(StorageUtil.pathToReference(person.profilePicture))
+                .circleCrop()
                 .placeholder(R.drawable.ic_account)
                 .into(viewHolder.imgPersonProfilePict)
         }
     }
 
     override fun getLayout() = R.layout.person_entry
+
+    override fun isSameAs(other: com.xwray.groupie.Item<*>): Boolean {
+        if (other !is PersonItem)
+            return false
+        if (this.person != other.person)
+            return false
+        return true
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return isSameAs(other as PersonItem)
+    }
+
+    override fun hashCode(): Int {
+        var result = person.hashCode()
+        result = 31 * result + context.hashCode()
+        return result
+    }
 }

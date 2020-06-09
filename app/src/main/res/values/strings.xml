@@ -11,5 +11,14 @@
     <string name="sign_out">Sign out</string>
     <string name="save">Save</string>
     <string name="send_your_message">Send your message</string>
-    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</string>
+    <string name="pangram">The quick brown fox jumps over the lazy dog.</string>
+    <string name="select_image">Select Image</string>
+    <string name="saving">Saving</string>
+    <string name="provide_name">Please provide name</string>
+    <string name="enter_name">Please enter a message</string>
+    <string name="new_picture">New Picture</string>
+    <string name="from_camera">From the Camera</string>
+    <string name="grant_permission">Please grant permission in settings</string>
+    <string name="no_internet">Please check your internet connection</string>
+    <string name="unknown_error">Unknown Error</string>
 </resources>

@@ -15,8 +15,8 @@ import java.lang.NullPointerException
 
 object FireStoreUtil {
 
-    const val FIRESTORE_TAG = "FIRESTORE"
-    const val ENGAGED_CHAT_CHANNEL = "engagedChatChannels"
+    private const val FIRESTORE_TAG = "FIRESTORE"
+    private const val ENGAGED_CHAT_CHANNEL = "engagedChatChannels"
     private val fireStoreInstance: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
     private val currentUserDocRef: DocumentReference
@@ -29,6 +29,11 @@ object FireStoreUtil {
 
     fun initCurrentUserIfFirstTime(onComplete: () -> Unit) {
         currentUserDocRef.get().addOnCompleteListener {
+            if (!it.isSuccessful) {
+                it.addOnFailureListener { exception ->
+                    Log.d("FireStore", "error: ${exception.message}")
+                }
+            }
             if (!it.result!!.exists()) {
                 val newUser = User(
                     FirebaseAuth.getInstance().currentUser?.displayName ?: "",
@@ -145,7 +150,6 @@ object FireStoreUtil {
             .add(message)
     }
 
-    //Region FCM
     fun getFCMRegistrationTokens(onComplete: (tokens: MutableList<String>) -> Unit) {
         currentUserDocRef.get().addOnSuccessListener {
             val user = it.toObject(User::class.java)!!
@@ -156,5 +160,4 @@ object FireStoreUtil {
     fun setFCMRegistrationToken(registrationTokens: MutableList<String>) {
         currentUserDocRef.update(mapOf("registrationTokens" to registrationTokens))
     }
-    //endRegion FCM
 }
