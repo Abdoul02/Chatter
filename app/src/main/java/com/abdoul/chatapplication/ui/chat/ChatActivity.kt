@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
@@ -57,10 +58,10 @@ class ChatActivity : AppCompatActivity() {
 
         imageView_send.setOnClickListener {
             if (editText_message.length() > 0) {
-                chatViewModel.sendMessage(editText_message.text.toString(),otherUserId)
+                chatViewModel.sendMessage(editText_message.text.toString(), otherUserId)
                 editText_message.setText("")
             } else {
-                CommonUtils.showToast(this, "Please enter a message")
+                CommonUtils.showToast(this, getString(R.string.enter_name))
             }
         }
 
@@ -79,7 +80,7 @@ class ChatActivity : AppCompatActivity() {
                 putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png"))
             }
             startActivityForResult(
-                Intent.createChooser(intent, "Select Image"),
+                Intent.createChooser(intent, getString(R.string.select_image)),
                 SELECT_IMAGE_MSG_REQUEST
             )
         }
@@ -101,7 +102,7 @@ class ChatActivity : AppCompatActivity() {
 
                     selectedImageBmp?.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     val selectedImageBytes = outputStream.toByteArray()
-                    chatViewModel.sendImageMessage(otherUserId,selectedImageBytes)
+                    chatViewModel.sendImageMessage(otherUserId, selectedImageBytes)
                 }
             }
 
@@ -110,7 +111,7 @@ class ChatActivity : AppCompatActivity() {
                     val photoBitmap = CommonUtils.getBitmap(this, imageUri)
                     photoBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
                     val capturedPictureByte = outputStream.toByteArray()
-                    chatViewModel.sendImageMessage(otherUserId,capturedPictureByte)
+                    chatViewModel.sendImageMessage(otherUserId, capturedPictureByte)
                 }
             }
         }
@@ -170,15 +171,19 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun takePicture() {
-        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
-            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
-        ) {
-            val permission =
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            requestPermissions(
-                permission,
-                PERMISSION_CODE
-            )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
+            ) {
+                val permission =
+                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                requestPermissions(
+                    permission,
+                    PERMISSION_CODE
+                )
+            } else {
+                openCamera()
+            }
         } else {
             openCamera()
         }
@@ -186,8 +191,8 @@ class ChatActivity : AppCompatActivity() {
 
     private fun openCamera() {
         val values = ContentValues()
-        values.put(MediaStore.Images.Media.TITLE, "New Picture")
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
+        values.put(MediaStore.Images.Media.TITLE, getString(R.string.new_picture))
+        values.put(MediaStore.Images.Media.DESCRIPTION, getString(R.string.from_camera))
         imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
@@ -208,7 +213,7 @@ class ChatActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera()
                 } else {
-                    CommonUtils.showToast(this, "Please grant permission in settings")
+                    CommonUtils.showToast(this, getString(R.string.grant_permission))
                 }
             }
         }

@@ -12,7 +12,6 @@ import com.abdoul.chatapplication.util.StorageUtil
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ListenerRegistration
 import com.xwray.groupie.kotlinandroidextensions.Item
-import kotlinx.android.synthetic.main.activity_chat.*
 import java.util.*
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
@@ -26,15 +25,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
     private lateinit var messagesListenerRegistration: ListenerRegistration
     private val messagesMutableLiveData = MutableLiveData<List<Item>>()
     val messagesLiveData: LiveData<List<Item>>
         get() = messagesMutableLiveData
-
-    fun initialiseMessageListener() {
-
-    }
 
     fun getOrCreateChatChannel(otherUserId: String) {
         FireStoreUtil.getOrCreateChatChannel(otherUserId) { channelId ->

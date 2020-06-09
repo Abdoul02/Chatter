@@ -10,16 +10,16 @@ import com.xwray.groupie.kotlinandroidextensions.Item
 
 class UsersViewModel : ViewModel() {
     private lateinit var userListenerRegistration: ListenerRegistration
-    private val _itemsMutableLiveData = MutableLiveData<List<Item>>()
+    private val itemsMutableLiveData = MutableLiveData<List<Item>>()
     val itemsLiveData: LiveData<List<Item>>
-        get() = _itemsMutableLiveData
+        get() = itemsMutableLiveData
 
     fun initUserListener(context: Context) {
         userListenerRegistration = FireStoreUtil.addUsersListener(context, this::getItems)
     }
 
     private fun getItems(items: List<Item>) {
-        _itemsMutableLiveData.postValue(items)
+        itemsMutableLiveData.postValue(items)
     }
 
     fun removeUserListenerRegistration(){

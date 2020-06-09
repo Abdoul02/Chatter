@@ -9,9 +9,9 @@ import com.abdoul.chatapplication.util.StorageUtil
 
 class AccountViewModel : ViewModel() {
 
-    private val _userMutableLiveData = MutableLiveData<User>()
+    private val userMutableLiveData = MutableLiveData<User>()
     val userLiveData: LiveData<User>
-        get() = _userMutableLiveData
+        get() = userMutableLiveData
 
     init {
         getUser()
@@ -34,7 +34,7 @@ class AccountViewModel : ViewModel() {
 
     private fun getUser() {
         FireStoreUtil.getCurrentUser { user ->
-            _userMutableLiveData.postValue(user)
+            userMutableLiveData.postValue(user)
         }
     }
 

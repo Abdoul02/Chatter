@@ -25,7 +25,7 @@
             android:paddingTop="4dp"
             android:paddingEnd="8dp"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Body1"
-            tools:text="@string/lorem_ipsum" />
+            tools:text="@string/pangram" />
 
         <TextView
             android:id="@+id/textView_message_time"

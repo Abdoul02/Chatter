@@ -48,7 +48,7 @@ class AccountFragment : Fragment() {
                     putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png"))
                 }
                 startActivityForResult(
-                    Intent.createChooser(intent, "Select Image"),
+                    Intent.createChooser(intent, getString(R.string.select_image)),
                     SELECT_IMAGE_REQUEST
                 )
             }
@@ -68,9 +68,9 @@ class AccountFragment : Fragment() {
                             edtBio.text.toString()
                         )
                     }
-                    CommonUtils.showToast(requireContext(), "Saving")
+                    CommonUtils.showToast(requireContext(), getString(R.string.saving))
                 } else {
-                    CommonUtils.showToast(requireContext(), "Please provide name")
+                    CommonUtils.showToast(requireContext(), getString(R.string.provide_name))
                 }
             }
 
